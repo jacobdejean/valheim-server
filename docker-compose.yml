@@ -1,0 +1,44 @@
+services:
+  valheim:
+    image: mbround18/valheim:3
+    container_name: valheim
+    user: "${PUID:-1000}:${PGID:-1000}"
+    stop_signal: SIGINT
+    stop_grace_period: 2m   # give the server time to save on shutdown
+    restart: unless-stopped
+    ports:
+      - "${PORT:-2456}:2456/udp"
+      - "2457:2457/udp"
+      - "2458:2458/udp"
+    environment:
+      PORT: ${PORT:-2456}
+      NAME: ${SERVER_NAME}
+      WORLD: ${WORLD}
+      PASSWORD: ${PASSWORD}
+      PUBLIC: ${PUBLIC:-1}
+      TZ: ${TZ:-America/Los_Angeles}
+
+      # QoL: auto update / backup / restarts
+      UPDATE_ON_STARTUP: 1
+      AUTO_UPDATE: ${AUTO_UPDATE:-1}
+      AUTO_UPDATE_SCHEDULE: ${AUTO_UPDATE_SCHEDULE:-0 3 * * *}
+      AUTO_UPDATE_PAUSE_WITH_PLAYERS: ${AUTO_UPDATE_PAUSE_WITH_PLAYERS:-1}
+
+      AUTO_BACKUP: ${AUTO_BACKUP:-1}
+      AUTO_BACKUP_SCHEDULE: ${AUTO_BACKUP_SCHEDULE:-*/30 * * * *}
+      AUTO_BACKUP_REMOVE_OLD: 1
+      AUTO_BACKUP_DAYS_TO_LIVE: ${AUTO_BACKUP_DAYS_TO_LIVE:-3}
+      AUTO_BACKUP_ON_UPDATE: 1
+      AUTO_BACKUP_ON_SHUTDOWN: 1
+
+      SCHEDULED_RESTART: ${SCHEDULED_RESTART:-0}
+      SCHEDULED_RESTART_SCHEDULE: ${SCHEDULED_RESTART_SCHEDULE:-0 4 * * *}
+
+      # Discord notifications (optional)
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      WEBHOOK_INCLUDE_PUBLIC_IP: 1
+      PLAYER_EVENT_NOTIFICATIONS: 1
+    volumes:
+      - ./data/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ./data/server:/home/steam/valheim
+      - ./data/backups:/home/steam/backups
